@@ -3,7 +3,10 @@ const constants = require("../utils/constants");
 const Job = require("../models/job.model");
 const Company = require("../models/company.model");
 
-
+/**
+ * Create a Job - job
+ *   v1 - Any one should be able to create the ticket
+ */
 
 exports.createJob = async (req, res) => {
 
@@ -17,12 +20,17 @@ exports.createJob = async (req, res) => {
     }
 
     try {
-        const job = await Job.create(jobObj);
-        console.log(job)
-
         const company = await Company.findOne({
             _id: job.companyId
         });
+        if(!company){
+            return res.status(200).send({
+                message: "Company Doesnt Exist"
+            })
+        }
+
+        const job = await Job.create(jobObj);
+        console.log(job)
 
         company.jobsPosted.push(job._id);
 
@@ -41,6 +49,7 @@ exports.createJob = async (req, res) => {
 
 exports.getAllJobs = async (req, res) => {
 
+    // const user =  await User.findOne({userId : req.userId});
 
     const jobs = await Job.find({});
 
@@ -48,19 +57,11 @@ exports.getAllJobs = async (req, res) => {
 }
 
 exports.getOneJob = async (req, res) => {
-    try{
-            
-        const job = await Job.findOne({
-            _id: req.params.id
-        });
+    const job = await Job.findOne({
+        _id: req.params.id
+    });
 
-        res.status(200).send(job);
-    }catch(err){
-        console.log(err.message);
-        return res.status(500).send({
-            message: "Some internal error"
-        })
-    }
+    res.status(200).send(job);
 }
 
 exports.updateJob = async (req, res) => {
@@ -69,29 +70,20 @@ exports.updateJob = async (req, res) => {
         _id: req.params.id
     });
 
-    const user =  await User.findOne({userId : req.userId});
-
-    console.log(user, req.userId);
     if (job == null) {
         return res.status(200).send({
             message: "Job doesn't exist"
         })
     }
 
+    const user =  await User.findOne({userId : req.userId});
+    console.log(user, req.userId);
+
     if(req.query.applyJob){
-        if(user.userType == constants.userType.student){
-            return applyJob(req, res, job, user);
-        }else{
-            return res.status(401).send({
-                message: "Requires STUDENT Role"
-            })
-        }
+        return applyJob(req, res, job, user);
     }
-    if(user.userType == constants.userType.student){
-        return res.status(401).send({
-            message: "Requires ADMIN/RECRUITER Role"
-        })
-    }
+
+    // Update the attributes of the saved company
 
     job.name = req.body.title != undefined ? req.body.title : job.title;
     job.description = req.body.description != undefined ? req.body.description : job.description;
@@ -100,27 +92,27 @@ exports.updateJob = async (req, res) => {
 
     const updatedJob = await job.save();
 
-
+    // Return the updated job
 
     return res.status(200).send(updatedJob);
 }
 
 let applyJob = async (req, res, job, user)=>{
     try {
-            job.students.push(user._id);
-            const updatedJob = await job.save();
+        job.students.push(user._id);
+        const updatedJob = await job.save();
 
-            user.jobs.push(job._id);
-            const updatedUser = await user.save();
+        user.jobs.push(job._id);
+        const updatedUser = await user.save();
 
-            return res.status(200).send(updatedUser);
+        return res.status(200).send(updatedUser);
     } catch (err) {
         console.log(err.message);
         return res.status(500).send({
             message: "Some internal error"
         })
     }
-
+    
 }
 
 exports.deleteJob = async (req, res) => {
@@ -136,10 +128,3 @@ exports.deleteJob = async (req, res) => {
         })
     }
 }
-
-/**
- * 
- * Sir I had only written 10 percent of the problem statemen so I closed the pull request and will re raise it by tomorrow 
- * 
- * 
- */
