@@ -65,10 +65,6 @@ isAdminOrRecruiter = async (req,res, next) =>{
 
 isStudent = async (req,res, next) =>{
 
-<<<<<<< HEAD
-    const user = await User.findOne({userId : req.userId});
-
-=======
     /**
      * Fetcht user from the DB using the userId
      */
@@ -77,22 +73,15 @@ isStudent = async (req,res, next) =>{
     /**
      * Check what is the user type
      */
->>>>>>> 349e51ffe6fbcdf7f87aeebfa1dd10dabf3b0e00
     if(user && (user.userType == constants.userType.student)){
         next();
     }else{
         res.status(403).send({
-<<<<<<< HEAD
-            message: "Require student role"
-=======
             message: "Requires STUDENT role"
->>>>>>> 349e51ffe6fbcdf7f87aeebfa1dd10dabf3b0e00
         })
     }
 }
 
-<<<<<<< HEAD
-=======
 verifyApplyOrUpdateJob = async (req,res, next) =>{
 
     const user = await User.findOne({userId : req.userId});
@@ -113,16 +102,11 @@ verifyApplyOrUpdateJob = async (req,res, next) =>{
 
     next();
 }
->>>>>>> 349e51ffe6fbcdf7f87aeebfa1dd10dabf3b0e00
 
 const authJwt = {
     verifyToken : verifyToken,
     isAdminOrRecruiter : isAdminOrRecruiter,
-<<<<<<< HEAD
-    isStudent : isStudent
-=======
     isStudent: isStudent,
     verifyApplyOrUpdateJob: verifyApplyOrUpdateJob
->>>>>>> 349e51ffe6fbcdf7f87aeebfa1dd10dabf3b0e00
 };
 module.exports= authJwt;
